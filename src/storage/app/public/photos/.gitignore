@@ -1,0 +1,9 @@
+# photos/item_images ディレクトリを追跡
+!item_images/
+!.gitignore
+# photos/logo_images ディレクトリを追跡
+!logo_images/
+!.gitignore
+# photos/profile_images ディレクトリを追跡
+!profile_images/
+!.gitignore
