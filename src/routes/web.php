@@ -135,6 +135,12 @@ Route::middleware('auth')->group(function () {
     // 取引チャット投稿処理
     Route::post('/transaction/{transactionId}/message', [TransactionController::class, 'store'])->name('transaction.message.store');
 
+    // 取引チャットの編集
+    Route::put('/transaction/{transactionId}/message/{messageId}', [TransactionController::class, 'update'])->name('transaction.message.update');
+
+    // 取引チャットの削除
+    Route::delete('/transaction/{transactionId}/message/{messageId}', [TransactionController::class, 'destroy'])->name('transaction.message.destroy');
+
     // 取引を完了にする処理
     Route::post('/transaction/{transactionId}/complete', [TransactionController::class, 'complete'])->name('transaction.complete');
 });
