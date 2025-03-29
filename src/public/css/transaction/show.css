@@ -33,8 +33,9 @@ body {
 }
 
 /* チャット画面 */
-.error-message {
+.error-messages {
     color: #e65a5a;
+    font-weight: bold;
 }
 
 .chat-container {
@@ -309,7 +310,11 @@ body {
     grid-column: 2/3;
 }
 
-.send-chat-add-img__btn {
+.send-chat__form--right input {
+    display: none;
+}
+
+.send-chat__form--right label {
     width: fit-content;
     color: #ff6b6b;
     padding: 5px 15px;
@@ -325,7 +330,7 @@ body {
     align-items: center;
 }
 
-.send-chat-add-img__btn:hover {
+.send-chat__form--right label:hover {
     background-color: #ff6b6b;
     color: #fff;
 }
@@ -342,6 +347,10 @@ body {
     display: inline-block;
     width: 50px;
     height: 50px;
+}
+
+.send-chat__btn--img:hover {
+    filter: opacity(50%);
 }
 
 /* レスポンシブ対応 */
