@@ -15,10 +15,8 @@
                 <img src="{{ asset('storage/photos/logo_images/logo.svg') }}" alt="COACHTECH ロゴ" class="logo" />
             </div>
             <div class="header-center">
-
             </div>
             <div class="header-right">
-
             </div>
         </div>
     </header>
@@ -34,14 +32,6 @@
                             onclick="saveDraftMessage({{ $transaction->id }})">{{ $other->purchase->item->item_name }}</a>
                     </li>
                 @endforeach
-                {{-- @foreach ($otherTransactions as $other)
-                    <li class="sidebar__list">
-                        <a href="{{ route('transaction.show', ['transactionId' => $other->id]) }}"
-                            ({{ $transaction->id }}) ">
-                            {{ $other->purchase->item->item_name }}
-                        </a>
-                    </li>
- @endforeach --}}
             </ul>
         </div>
 
@@ -74,58 +64,48 @@
         </div>
 
         <div class="chat">
-            {{-- @foreach ($messages as $message)
-                <div class="chat-message {{ $message->user_id === Auth::id() ? 'my-message' : 'partner-message' }}">
-                    <div class="user-info">
-                        <img src="{{ $message->user->profile_image ? asset('storage/photos/profile_images/' . $message->user->profile_image) : asset('images/default-avatar.png') }}"
-                            alt="ユーザー画像">
-                        <span>{{ $message->user->name }}</span>
-                    </div>
-                    <p>{{ $message->message }}</p>
-                </div>
-            @endforeach --}}
-
-            {{-- <div class="chat-main">
-                <div class="chat-partner">
-                    <div class="chat-user">
-                        <div class="chat-user-image"></div>
-                        <span class="chat-user-name">ユーザー名</span>
-                    </div>
-                    <div class="chat-box">
-                        <p class="chat-text">こちらにコメントが入ります。</p>
-                    </div>
-                </div>
-                <div class="chat-myself">
-                    <div class="chat-user">
-                        <div class="chat-user-image"></div>
-                        <span class="chat-user-name">ユーザー名</span>
-                    </div>
-                    <div class="chat-box">
-                        <p class="chat-text">こちらにコメントが入ります。</p>
-                    </div>
-                </div>
-            </div> --}}
-
             <div class="chat-main">
                 @foreach ($messages as $message)
-                    <div class="{{ $message['chatClass'] }}">
+                    <div class="{{ $message['chatClass'] }}" id="message-{{ $message['message']->id }}">
                         <div class="chat-user">
                             <div class="chat-user-image">
-                                {{-- <img src="{{ $message['user']->profile_image ? asset('storage/photos/profile_images/' . $message['user']->profile_image) : asset('images/default-avatar.png') }}"
-                                    alt="ユーザー画像"> --}}
                                 <img src="{{ asset('storage/photos/profile_images/' . $message['user']->profile_image) }}"
                                     alt="">
                             </div>
                             <span class="chat-user-name">{{ $message['user']->name }}</span>
                         </div>
                         <div class="chat-box">
-                            <p class="chat-text">{{ $message['message']->message }}</p>
+                            <p class="chat-text" id="message-text-{{ $message['message']->id }}">
+                                {{ $message['message']->message }}</p>
+
+                            {{-- 編集・削除ボタン --}}
+                            @if (Auth::id() === $message['user']->id)
+                                <div class="chat-actions">
+                                    <button onclick="showEditForm({{ $message['message']->id }})">編集</button>
+                                    <form
+                                        action="{{ route('transaction.message.destroy', ['transactionId' => $transaction->id, 'messageId' => $message['message']->id]) }}"
+                                        method="POST" style="display:inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" onclick="return confirm('本当に削除しますか？')">削除</button>
+                                    </form>
+                                </div>
+                                <form id="edit-form-{{ $message['message']->id }}"
+                                    action="{{ route('transaction.message.update', ['transactionId' => $transaction->id, 'messageId' => $message['message']->id]) }}"
+                                    method="POST" style="display:none;">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="text" name="message" value="{{ $message['message']->message }}"
+                                        required>
+                                    <button type="submit">保存</button>
+                                    <button type="button"
+                                        onclick="hideEditForm({{ $message['message']->id }})">キャンセル</button>
+                                </form>
+                            @endif
                         </div>
                     </div>
                 @endforeach
             </div>
-
-
         </div>
 
         <div class="send-chat">
@@ -149,12 +129,9 @@
                         placeholder="取引メッセージを記入してください" value="{{ session('draft_message') ?? '' }}">
                 </div>
                 <div class="send-chat__form--right">
-                    {{-- <a href="" class="send-chat-add-img__btn">画像を追加</a> --}}
                     <label>画像を追加
                         <input type="file" name="chat_image" class="send-chat__file-input">
                     </label>
-                    {{-- <button class="send-chat__btn" type="submit"><img class="send-chat__btn--img"
-                            src="{{ asset('storage/photos/logo_images/send-btn.png') }}" alt=""></button> --}}
                     <button class="send-chat__btn" type="submit">
                         <img class="send-chat__btn--img" src="{{ asset('storage/photos/logo_images/send-btn.png') }}"
                             alt="送信">
@@ -189,6 +166,16 @@
             document.addEventListener('DOMContentLoaded', function() {
                 loadDraftMessage({{ $transaction->id }});
             });
+
+            function showEditForm(id) {
+                document.getElementById(`message-text-${id}`).style.display = 'none';
+                document.getElementById(`edit-form-${id}`).style.display = 'block';
+            }
+
+            function hideEditForm(id) {
+                document.getElementById(`message-text-${id}`).style.display = 'block';
+                document.getElementById(`edit-form-${id}`).style.display = 'none';
+            }
         </script>
 
     </main>

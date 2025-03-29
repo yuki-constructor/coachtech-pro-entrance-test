@@ -7,7 +7,6 @@ use App\Models\Transaction;
 use App\Models\TransactionMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class TransactionController extends Controller
 {
@@ -21,7 +20,6 @@ class TransactionController extends Controller
         // 取引相手のユーザーを特定
         $isSeller = $transaction->purchase->item->user_id === $user->id; // ログインユーザーが出品者か判定
         $partner = $isSeller ? $transaction->purchase->user : $transaction->purchase->item->user; // 取引相手ユーザーを特定
-        // dd($partner);
 
         // 他の取引を取得 (購入者 or 出品者として関与)
         $otherTransactions = Transaction::where('id', '!=', $transactionId)
@@ -94,6 +92,39 @@ class TransactionController extends Controller
         ]);
 
         return redirect()->route('transaction.show', $transaction->id);
+    }
+
+    // メッセージ編集
+    public function update(StoreTransactionMessageRequest $request, $transactionId, $messageId)
+    {
+        $transaction = Transaction::findOrFail($transactionId);
+        $message = TransactionMessage::findOrFail($messageId);
+
+        // ログイン中のユーザーのメッセージのみ編集可能
+        if ($message->user_id !== Auth::id()) {
+            return redirect()->back();
+        }
+
+        $message->update([
+            'message' => $request->message,
+        ]);
+
+        return redirect()->route('transaction.show', $transactionId);
+    }
+
+    // メッセージ削除
+    public function destroy($transactionId, $messageId)
+    {
+        $transaction = Transaction::findOrFail($transactionId);
+        $message = TransactionMessage::findOrFail($messageId);
+
+        // ログイン中のユーザーのメッセージのみ削除可能
+        if ($message->user_id !== Auth::id()) {
+            return redirect()->back();
+        }
+
+        $message->delete();
+        return redirect()->route('transaction.show', $transactionId);
     }
 
     // 取引を完了にする処理
