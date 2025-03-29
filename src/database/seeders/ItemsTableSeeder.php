@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Item;
 use App\Models\Category;
@@ -63,7 +62,7 @@ class ItemsTableSeeder extends Seeder
                 'conditions' => ['良好'],
             ],
             [
-                'user_id' => 2,
+                'user_id' => 1,
                 'item_name' => 'HDD',
                 'item_image' => 'HDD+Hard+Disk.jpg',
                 'brand' => 'BUFFALO',
@@ -73,7 +72,7 @@ class ItemsTableSeeder extends Seeder
                 'conditions' => ['目立った傷や汚れなし'],
             ],
             [
-                'user_id' => 3,
+                'user_id' => 1,
                 'item_name' => '玉ねぎ3束',
                 'item_image' => 'iLoveIMG+d.jpg',
                 'brand' => '北海道ファーム',
@@ -83,7 +82,7 @@ class ItemsTableSeeder extends Seeder
                 'conditions' => ['やや傷や汚れあり'],
             ],
             [
-                'user_id' => 4,
+                'user_id' => 1,
                 'item_name' => '革靴',
                 'item_image' => 'Leather+Shoes+Product+Photo.jpg',
                 'brand' => 'Armani',
@@ -93,7 +92,7 @@ class ItemsTableSeeder extends Seeder
                 'conditions' => ['状態が悪い'],
             ],
             [
-                'user_id' => 5,
+                'user_id' => 1,
                 'item_name' => 'ノートPC',
                 'item_image' => 'Living+Room+Laptop.jpg',
                 'brand' => 'sony',
@@ -103,7 +102,7 @@ class ItemsTableSeeder extends Seeder
                 'conditions' => ['良好'],
             ],
             [
-                'user_id' => 6,
+                'user_id' => 2,
                 'item_name' => 'マイク',
                 'item_image' => 'Music+Mic+4632231.jpg',
                 'brand' => 'エレコム',
@@ -113,7 +112,7 @@ class ItemsTableSeeder extends Seeder
                 'conditions' => ['目立った傷や汚れなし'],
             ],
             [
-                'user_id' => 7,
+                'user_id' => 2,
                 'item_name' => 'ショルダーバッグ',
                 'item_image' => 'Purse+fashion+pocket.jpg',
                 'brand' => 'CHANEL',
@@ -123,7 +122,7 @@ class ItemsTableSeeder extends Seeder
                 'conditions' => ['やや傷や汚れあり'],
             ],
             [
-                'user_id' => 8,
+                'user_id' => 2,
                 'item_name' => 'タンブラー',
                 'item_image' => 'Tumbler+souvenir.jpg',
                 'brand' => 'ニトリ',
@@ -133,7 +132,7 @@ class ItemsTableSeeder extends Seeder
                 'conditions' => ['状態が悪い'],
             ],
             [
-                'user_id' => 9,
+                'user_id' => 2,
                 'item_name' => 'コーヒーミル',
                 'item_image' => 'Waitress+with+Coffee+Grinder.jpg',
                 'brand' => 'Panasonic',
@@ -143,7 +142,7 @@ class ItemsTableSeeder extends Seeder
                 'conditions' => ['良好'],
             ],
             [
-                'user_id' => 10,
+                'user_id' => 2,
                 'item_name' => 'メイクセット',
                 'item_image' => '%E5%A4%96%E5%87%BA%E3%83%A1%E3%82%A4%E3%82%AF%E3%82%A2%E3%83%83%E3%83%95%E3%82%9A%E3%82%BB%E3%83%83%E3%83%88.jpg',
                 'brand' => '資生堂',

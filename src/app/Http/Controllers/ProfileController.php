@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Item;
 use App\Models\Purchase;
+use App\Models\Transaction;
+use App\Models\TransactionMessage;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use App\Http\Requests\ProfileRequest;
@@ -71,6 +73,49 @@ class ProfileController extends Controller
         $purchases = $user->purchases()->get();
         // 購入した商品を表示
         return view('profile.show-buy', ['user' => $user, 'purchases' => $purchases]);
+    }
+
+    // プロフィール表示画面（取引中の商品）
+    public function showTransaction()
+    {
+        $user = Auth::user();
+
+        // 取引中の商品を取得 (全てのメッセージ順)
+        $transactions = Transaction::where(function ($query) use ($user) {
+            // 購入した商品の条件
+            $query->whereHas('purchase', function ($q) use ($user) {
+                $q->where('user_id', $user->id); // ログインユーザーが購入した商品
+            })
+                // 出品した商品の条件
+                ->orWhereHas('purchase.item', function ($q) use ($user) {
+                    $q->where('user_id', $user->id); // ログインユーザーが出品した商品
+                });
+        })
+            ->where('status', 0) // 取引中
+            ->with(['purchase.item', 'transactionMessages' => function ($query) {
+                $query->orderByDesc('created_at'); // メッセージの新しい順
+            }])
+            ->withCount(['transactionMessages as unread_count' => function ($query) {
+                $query->where('is_read', 0);
+            }]) // 未読メッセージ件数
+            ->orderByDesc('created_at') // 取引メッセージ順にソート(結合後にソート)
+            ->get(); // コレクションとして取得
+
+        // // 未読メッセージを取得 (transaction_idごと)
+        // $unreadMessages = TransactionMessage::whereIn('transaction_id', $transactions->pluck('id')) // 対象の取引IDのみ
+        //     ->where('is_read', 0) // 未読のみ
+        //     ->get();
+
+        // // 各取引ごとの未読件数をカウント
+        // $unreadCounts = $unreadMessages->groupBy('transaction_id')->map(function ($messages) {
+        //     return $messages->count(); // 件数を数える
+        // });
+
+        return view('profile.show-transaction', [
+            'user' => $user,
+            'transactions' => $transactions,
+            // 'unreadCounts' => $unreadCounts, // 通知マーク用
+        ]);
     }
 
     // プロフィール編集画面

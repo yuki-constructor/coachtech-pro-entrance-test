@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Item;
 use App\Models\Purchase;
-use App\Http\Requests\PurchaseRequest;
+use App\Models\Transaction;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
 use Illuminate\Support\Facades\Auth;
@@ -22,7 +22,6 @@ class PurchaseController extends Controller
 
         return view('items.purchase', ['item' => $item, "user" => $user]);
     }
-
 
     // 商品購入処理
     public function payment(Request $request, $itemId)
@@ -71,13 +70,10 @@ class PurchaseController extends Controller
         return redirect($session->url);
     }
 
-
-
     public function success(Request $request)
     {
         // リクエストからpurchase_idを取得
         $purchase = Purchase::where('stripe_payment_id', $request->input('purchase_id'))->first();
-
 
         // Stripeの秘密鍵を設定
         Stripe::setApiKey(env('STRIPE_SECRET_KEY'));
@@ -90,6 +86,12 @@ class PurchaseController extends Controller
 
             // 購入ステータスを「完了」に更新
             $purchase->update(['purchase_status' => 1]); // 1: 完了
+
+            // 取引を開始 (status: 0 = 取引中)
+            Transaction::create([
+                'purchase_id' => $purchase->id,
+                'status' => 0, // 0:取引中
+            ]);
         }
 
         // プロフィール画面_購入した商品一覧を表示

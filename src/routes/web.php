@@ -8,7 +8,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\PurchaseController;
-use App\Http\Controllers\CommentController;
+use App\Http\Controllers\TransactionController;
 
 use App\Models\Purchase;
 
@@ -118,4 +118,23 @@ Route::middleware('auth')->group(function () {
 
     // 商品詳細画面表示（コメントの処理）
     Route::post('/items/{itemId}/comment', [ItemController::class, 'comment'])->name('comment');
+});
+
+
+// ===================================================
+//  追加機能
+// ===================================================
+Route::middleware('auth')->group(function () {
+
+    // プロフィール画面(取引中の商品)
+    Route::get('/profile/show/transaction', [ProfileController::class, 'showTransaction'])->name('profile.show.transaction');
+
+    // 取引チャット画面表示
+    Route::get('/transaction/{transactionId}', [TransactionController::class, 'show'])->name('transaction.show');
+
+    // 取引チャット投稿処理
+    Route::post('/transaction/{transactionId}/message', [TransactionController::class, 'store'])->name('transaction.message.store');
+
+    // 取引を完了にする処理
+    Route::post('/transaction/{transactionId}/complete', [TransactionController::class, 'complete'])->name('transaction.complete');
 });

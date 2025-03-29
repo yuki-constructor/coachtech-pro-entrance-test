@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class Purchase extends Model
 {
@@ -26,5 +25,11 @@ class Purchase extends Model
     public function item()
     {
         return $this->belongsTo(Item::class);
+    }
+
+    //    Transactionとのリレーション
+    public function transaction()
+    {
+        return $this->hasOne(Transaction::class);
     }
 }

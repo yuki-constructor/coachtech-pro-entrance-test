@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>プロフィール</title>
-    <link rel="stylesheet" href="{{ asset('css/profile/show-sell.css') }}" />
+    <title>プロフィール（取引中の商品）</title>
+    <link rel="stylesheet" href="{{ asset('css/profile/show-transaction.css') }}" />
 </head>
 
 <body>
@@ -63,18 +63,38 @@
             </div>
         </div>
         <div class="menu">
-            <a href="#" class="menu__left-link">出品した商品</a>
+            <a href="{{ route('profile.show.sell') }}" class="menu__left-link">出品した商品</a>
             <a href="{{ route('profile.show.buy') }}" class="menu__center-link">購入した商品</a>
-            <a href="{{ route('profile.show.transaction') }}" class="menu__right-link">取引中の商品</a>
+            <a href="#" class="menu__right-link">取引中の商品</a>
         </div>
         <div class="item-list">
-            @foreach ($items as $item)
-                <div class="item">
-                    <img class="item-image" src="{{ asset('storage/photos/item_images/' . $item->item_image) }}"
-                        alt="">
-                    <div class="item-name">{{ $item->item_name }}</div>
-                </div>
+            @foreach ($transactions as $transaction)
+                <a href="{{ route('transaction.show', ['transactionId' => $transaction->id]) }}">
+                    <div class="item">
+                        {{-- 商品画像 --}}
+                        <img class="item-image"
+                            src="{{ asset('storage/photos/item_images/' . $transaction->purchase->item->item_image) }}"
+                            alt="">
+
+                        <div class="item-name">{{ $transaction->purchase->item->item_name }}</div>
+
+                        {{-- 通知マーク (未読が1件以上の場合のみ表示) --}}
+                        {{-- @if (isset($unreadCounts[$transaction->id]) && $unreadCounts[$transaction->id] > 0)
+                        <span class="notification-badge">
+                            {{ $unreadCounts[$transaction->id] }}
+                        </span>
+                    @endif --}}
+
+                        @if ($transaction->unread_count > 0)
+                            <span class="notification-badge">
+                                {{ $transaction->unread_count }}
+                            </span>
+                        @endif
+
+                    </div>
+                </a>
             @endforeach
+
         </div>
     </main>
 </body>

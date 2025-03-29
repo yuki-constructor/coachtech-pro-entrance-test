@@ -64,7 +64,8 @@
         </div>
         <div class="menu">
             <a href="{{ route('profile.show.sell') }}" class="menu__left-link">出品した商品</a>
-            <a href="#" class="menu__right-link">購入した商品</a>
+            <a href="#" class="menu__center-link">購入した商品</a>
+            <a href="{{ route('profile.show.transaction') }}" class="menu__right-link">取引中の商品</a>
         </div>
         <div class="item-list">
             @foreach ($purchases as $purchase)
@@ -75,22 +76,6 @@
                 </div>
             @endforeach
 
-            {{-- <div class="item">
-          <div class="item-image">商品画像</div>
-          <div class="item-name">商品名</div>
-        </div>
-        <div class="item">
-          <div class="item-image">商品画像</div>
-          <div class="item-name">商品名</div>
-        </div>
-        <div class="item">
-          <div class="item-image">商品画像</div>
-          <div class="item-name">商品名</div>
-        </div>
-        <div class="item">
-          <div class="item-image">商品画像</div>
-          <div class="item-name">商品名</div>
-        </div> --}}
         </div>
     </main>
 </body>
