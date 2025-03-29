@@ -124,7 +124,7 @@ body {
 .menu__left-link {
     margin-left: 150px;
     text-decoration: none;
-    color: red;
+    color: #636161;
 }
 
 .menu__center-link {
@@ -136,7 +136,7 @@ body {
 .menu__right-link {
     margin-left: 70px;
     text-decoration: none;
-    color: #636161;
+    color: red;
 }
 
 .menu__left-link:hover,
@@ -165,6 +165,18 @@ body {
 .item-name {
     color: #282828;
     justify-self: start;
+}
+
+.notification-badge {
+    background-color: red;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 50%;
+    padding: 5px 10px;
+    position: absolute;
+    top: -10px;
+    right: -10px;
 }
 
 /* レスポンシブ対応 */
