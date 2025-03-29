@@ -30,10 +30,18 @@
             <ul>
                 @foreach ($otherTransactions as $other)
                     <li class="sidebar__list">
-                        <a
-                            href="{{ route('transaction.show', ['transactionId' => $other->id]) }}">{{ $other->purchase->item->item_name }}</a>
+                        <a href="{{ route('transaction.show', ['transactionId' => $other->id]) }}"
+                            onclick="saveDraftMessage({{ $transaction->id }})">{{ $other->purchase->item->item_name }}</a>
                     </li>
                 @endforeach
+                {{-- @foreach ($otherTransactions as $other)
+                    <li class="sidebar__list">
+                        <a href="{{ route('transaction.show', ['transactionId' => $other->id]) }}"
+                            ({{ $transaction->id }}) ">
+                            {{ $other->purchase->item->item_name }}
+                        </a>
+                    </li>
+ @endforeach --}}
             </ul>
         </div>
 
@@ -103,15 +111,15 @@
                     <div class="{{ $message['chatClass'] }}">
                         <div class="chat-user">
                             <div class="chat-user-image">
-                                <img src="{{ $message['user']->profile_image ? asset('storage/photos/profile_images/' . $message['user']->profile_image) : asset('images/default-avatar.png') }}"
-                                    alt="ユーザー画像">
+                                {{-- <img src="{{ $message['user']->profile_image ? asset('storage/photos/profile_images/' . $message['user']->profile_image) : asset('images/default-avatar.png') }}"
+                                    alt="ユーザー画像"> --}}
+                                <img src="{{ asset('storage/photos/profile_images/' . $message['user']->profile_image) }}"
+                                    alt="">
                             </div>
                             <span class="chat-user-name">{{ $message['user']->name }}</span>
                         </div>
                         <div class="chat-box">
                             <p class="chat-text">{{ $message['message']->message }}</p>
-                            <span
-                                class="chat-timestamp">{{ $message['message']->created_at->format('Y/m/d H:i') }}</span>
                         </div>
                     </div>
                 @endforeach
@@ -121,20 +129,68 @@
         </div>
 
         <div class="send-chat">
-            <form class="send-chat__form" action="{{ route('transaction.message.store', $transaction->id) }}"
-                method="POST" enctype="multipart/form-data">
+            {{-- エラー表示 --}}
+            @if ($errors->any())
+                <div class="error-messages">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+            {{-- チャット投稿 --}}
+            <form class="send-chat__form"
+                action="{{ route('transaction.message.store', ['transactionId' => $transaction->id]) }}" method="POST"
+                enctype="multipart/form-data" onsubmit="clearDraftMessage({{ $transaction->id }})">
                 @csrf
                 <div class="send-chat__form--left">
-                    <input class="send-chat__input" type="text" name="message" placeholder="取引メッセージを記入してください"
-                        required>
+                    <input id="chatMessage" class="send-chat__input" type="text" name="message"
+                        placeholder="取引メッセージを記入してください" value="{{ session('draft_message') ?? '' }}">
                 </div>
                 <div class="send-chat__form--right">
-                    <a href="" class="send-chat-add-img__btn">画像を追加</a>
-                    <button class="send-chat__btn" type="submit"><img class="send-chat__btn--img"
-                            src="{{ asset('storage/photos/logo_images/send-btn.png') }}" alt=""></button>
+                    {{-- <a href="" class="send-chat-add-img__btn">画像を追加</a> --}}
+                    <label>画像を追加
+                        <input type="file" name="chat_image" class="send-chat__file-input">
+                    </label>
+                    {{-- <button class="send-chat__btn" type="submit"><img class="send-chat__btn--img"
+                            src="{{ asset('storage/photos/logo_images/send-btn.png') }}" alt=""></button> --}}
+                    <button class="send-chat__btn" type="submit">
+                        <img class="send-chat__btn--img" src="{{ asset('storage/photos/logo_images/send-btn.png') }}"
+                            alt="送信">
+                    </button>
+
                 </div>
             </form>
         </div>
+
+        <script>
+            // メッセージをLocalStorageに保存
+            function saveDraftMessage(transactionId) {
+                const message = document.getElementById('chatMessage').value;
+                if (message.trim() !== '') {
+                    localStorage.setItem(`draft_message_${transactionId}`, message);
+                }
+            }
+
+            // メッセージをLocalStorageから取得
+            function loadDraftMessage(transactionId) {
+                const draft = localStorage.getItem(`draft_message_${transactionId}`);
+                if (draft) {
+                    document.getElementById('chatMessage').value = draft;
+                }
+            }
+
+            // メッセージをLocalStorageから削除
+            function clearDraftMessage(transactionId) {
+                localStorage.removeItem(`draft_message_${transactionId}`);
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                loadDraftMessage({{ $transaction->id }});
+            });
+        </script>
+
     </main>
 </body>
 

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('message')->nullable(); // 空のままでも保存可
             $table->string('image_path')->nullable(); // 画像があれば
             $table->boolean('is_read')->default(0); // 0: 未読, 1: 既読   既読フラグ
-            $table->boolean('is_sent')->default(0); // 0: 未送信, 1: 送信済み   送信フラグ
+            // $table->boolean('is_sent')->default(0); // 0: 未送信, 1: 送信済み   送信フラグ
             $table->timestamps();
         });
     }

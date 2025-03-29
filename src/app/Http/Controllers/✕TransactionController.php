@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTransactionMessageRequest;
 use App\Models\Transaction;
 use App\Models\TransactionMessage;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -23,19 +22,11 @@ class TransactionController extends Controller
         $partner = $isSeller ? $transaction->purchase->user : $transaction->purchase->item->user; // 取引相手ユーザーを特定
         // dd($partner);
 
-        // 他の取引を取得 (購入者 or 出品者として関与)
+        // 他の取引を取得
         $otherTransactions = Transaction::where('id', '!=', $transactionId)
             ->whereHas('purchase', function ($query) use ($user) {
-                $query->where(function ($q) use ($user) {
-                    // 購入者または出品者として関わる取引を取得
-                    $q->where('user_id', $user->id) // 購入者として
-                        ->orWhereHas('item', function ($q2) use ($user) {
-                            $q2->where('user_id', $user->id); // 出品者として
-                        });
-                });
-            })
-            ->whereNull('completed_at') // 取引中のものだけ
-            ->get();
+                $query->where('user_id', $user->id);
+            })->get();
 
         // チャットメッセージ取得 (昇順)
         $messages = $transaction->transactionMessages()->orderBy('created_at', 'asc')
@@ -91,10 +82,12 @@ class TransactionController extends Controller
             'user_id' => Auth::id(),
             'message' => $request->message,
             'image_path' => $imagePath,
+            'is_sent' => 1,
         ]);
 
         return redirect()->route('transaction.show', $transaction->id);
     }
+
 
     // 取引を完了にする処理
     public function complete($transactionId)

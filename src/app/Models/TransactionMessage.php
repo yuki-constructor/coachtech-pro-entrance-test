@@ -20,4 +20,10 @@ class TransactionMessage extends Model
     {
         return $this->belongsTo(Transaction::class);
     }
+
+    // TransactionMessageは1対多の関係でUserと関連(userは複数のメッセージを投稿可能)
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
