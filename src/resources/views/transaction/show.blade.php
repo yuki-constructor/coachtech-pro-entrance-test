@@ -177,8 +177,57 @@
                 document.getElementById(`edit-form-${id}`).style.display = 'none';
             }
         </script>
-
     </main>
-</body>
 
+    @if (session('showReviewModal') ||
+            (Auth::id() === $transaction->purchase->item->user_id &&
+                $transaction->buyer_completed_at &&
+                !$transaction->seller_completed_at))
+        <div id="review-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-content-title">
+                    <p>取引が完了しました。</p>
+                </div>
+                <div class="modal-content-star">
+                    <p>今回の取引相手はどうでしたか？</p>
+                    <div class="star-rating">
+                        @for ($i = 1; $i <= 5; $i++)
+                            <span class="star" data-value="{{ $i }}">★</span>
+                        @endfor
+                    </div>
+                </div>
+                <div class="modal-content-submit-button">
+                    <form action="{{ route('transaction.review', $transaction->id) }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="rating" id="rating-value" value="0">
+                        <button type="submit" class="submit-button" disabled>送信する</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('review-modal');
+            if (modal) {
+                modal.style.display = 'block';
+
+                const stars = document.querySelectorAll('.star');
+                const ratingInput = document.getElementById('rating-value');
+                const submitButton = document.querySelector('.submit-button');
+
+                stars.forEach(star => {
+                    star.addEventListener('click', function() {
+                        const value = this.getAttribute('data-value');
+                        ratingInput.value = value;
+                        stars.forEach(s => s.style.color = s.getAttribute('data-value') <= value ?
+                            'gold' : 'gray');
+                        submitButton.disabled = false;
+                    });
+                });
+            }
+        });
+    </script>
+</body>
 </html>

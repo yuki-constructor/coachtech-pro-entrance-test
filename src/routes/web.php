@@ -121,26 +121,45 @@ Route::middleware('auth')->group(function () {
 });
 
 
-// ===================================================
-//  追加機能
-// ===================================================
+/**
+ * ==============================
+ * 追加機能（Pro入会テスト）
+ * ==============================
+ */
 Route::middleware('auth')->group(function () {
 
-    // プロフィール画面(取引中の商品)
+    /**
+     *  プロフィール画面(取引中の商品)
+     */
     Route::get('/profile/show/transaction', [ProfileController::class, 'showTransaction'])->name('profile.show.transaction');
 
-    // 取引チャット画面表示
+    /**
+     *  取引チャット画面表示
+     */
     Route::get('/transaction/{transactionId}', [TransactionController::class, 'show'])->name('transaction.show');
 
-    // 取引チャット投稿処理
+    /**
+     *  取引チャット投稿処理
+     */
     Route::post('/transaction/{transactionId}/message', [TransactionController::class, 'store'])->name('transaction.message.store');
 
-    // 取引チャットの編集
+    /**
+     *  取引チャットの編集
+     */
     Route::put('/transaction/{transactionId}/message/{messageId}', [TransactionController::class, 'update'])->name('transaction.message.update');
 
-    // 取引チャットの削除
+    /**
+     *  取引チャットの削除
+     */
     Route::delete('/transaction/{transactionId}/message/{messageId}', [TransactionController::class, 'destroy'])->name('transaction.message.destroy');
 
-    // 取引を完了にする処理
+    /**
+     *  取引を完了にする処理
+     */
     Route::post('/transaction/{transactionId}/complete', [TransactionController::class, 'complete'])->name('transaction.complete');
+
+    /**
+     *  取引相手の評価投稿処理
+     */
+    Route::post('/transaction/{transactionId}/review', [TransactionController::class, 'submitReview'])->name('transaction.review');
 });
