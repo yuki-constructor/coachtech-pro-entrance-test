@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTransactionMessageRequest;
+use App\Mail\ReviewNotification;
 use App\Models\Transaction;
 use App\Models\TransactionMessage;
 use App\Models\TransactionReview;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class TransactionController extends Controller
 {
@@ -180,6 +182,7 @@ class TransactionController extends Controller
         $reviewerId = Auth::id();
         $revieweeId = ($reviewerId === $transaction->purchase->user_id) ? $transaction->purchase->item->user_id : $transaction->purchase->user_id;
 
+        // 評価を保存
         TransactionReview::create([
             'transaction_id' => $transactionId,
             'reviewer_id' => $reviewerId,
@@ -187,6 +190,14 @@ class TransactionController extends Controller
             'rating' => $request->rating,
         ]);
 
+        // 購入者が評価した場合、出品者に通知メールを送信
+        if ($reviewerId === $transaction->purchase->user_id) {
+            Mail::to($transaction->purchase->item->user->email)
+                ->send(new ReviewNotification($transaction));
+        }
+
+        // 購入者が評価した場合、商品一覧にリダイレクト
+        // 出品者が評価した場合、transactionsテーブルのstatusカラムを１：取引完了に更新し、商品一覧にリダイレクト
         if ($reviewerId === $transaction->purchase->user_id) {
             return redirect()->route('items.index')->with('reviewSubmitted', true);
         } else {
