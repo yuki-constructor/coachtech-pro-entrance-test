@@ -1,6 +1,6 @@
 # アプリケーション名
 
-coachtechフリマ
+coachtech フリマ
 
 # 環境構築
 
@@ -8,24 +8,21 @@ coachtechフリマ
 
 以下のコマンドで、Git リポジトリをクローンします。
 
-$ git clone git@github.com:yuki-constructor/coachtech-mock-case1-2.git
+$ git clone git@github.com:yuki-constructor/coachtech-pro-entrance-test.git
 
 ## ⓶.env ファイルの作成
 
-以下のコマンドで、 src ディレクトリに移動し、.env.example を .env にコピーします。
+src ディレクトリに移動し、.env.example を .env にコピーします。
 
-$ cd coachtech-mock-case1-2/src/
+$ cd coachtech-pro-entrance-test/src/
 
 $ cp .env.example .env
 
-
 .env ファイルを開いて、以下の設定を変更します。
-
 
 APP_TIMEZONE=Asia/Tokyo
 
 APP_LOCALE=ja
-
 
 DB_CONNECTION=mysql
 
@@ -39,23 +36,21 @@ DB_USERNAME=laravel_user
 
 DB_PASSWORD=laravel_pass
 
+MAIL_MAILER=smtp
 
-MAIL_MAILER=smtp 
+MAIL_HOST=mailhog
 
-MAIL_HOST=mailpit 
+MAIL_PORT=1025
 
-MAIL_PORT=1025 
+MAIL_USERNAME=null
 
-MAIL_USERNAME=null 
+MAIL_PASSWORD=null
 
-MAIL_PASSWORD=null 
+MAIL_ENCRYPTION=null
 
-MAIL_ENCRYPTION=null 
+MAIL_FROM_ADDRESS=hello@example.com
 
-MAIL_FROM_ADDRESS=hello@example.com 
-
-MAIL_FROM_NAME="${APP_NAME}" 
-
+MAIL_FROM_NAME="${APP_NAME}"
 
 ## ⓷Docker コンテナのビルドと起動
 
@@ -93,7 +88,7 @@ $ php artisan storage:link
 
 $ php artisan migrate
 
- INFO  Nothing to migrate.と表示された場合は、次に進んでください。
+INFO Nothing to migrate.と表示された場合も、次に進んでください。
 
 ## ⑨phpMyAdmin の動作確認
 
@@ -111,61 +106,23 @@ $ php artisan migrate:fresh --seed
 
 もし、エラーとなった場合、ルートディレクトリで以下のコマンドを実行し、ディレクトリ書き込み権限を設定することで改善するか確認してください。
 
-sudo chmod -R 777 src/_　
+sudo chmod -R 777 src/*
 
 （PHP コンテナ内に入っている場合は、以下を実行）
 
-chmod -R 777 www/._ 
+$ cd ../  
+$ chmod -R 777 www/.*  
+$ cd www
 
-## ⑫Mailpit の設定
+## ⑫Mailhog の設定
 
 ### ⑫-1. 　 .env ファイルの修正
 
 ⓶.env ファイルの作成にて完了済み。
 
-### ⑫-2. 　 config/mail.php ファイルにて Mailpit の設定
+### ⑫-2. 　 Mailhog の動作確認
 
-以下のように設定を確認・修正してください。
-
-return [
-
-    'default' => env('MAIL_MAILER', 'smtp'),
-
-    'mailers' => [
-        'smtp' => [
-            'transport' => 'smtp',
-            'host' => env('MAIL_HOST', '127.0.0.1'),
-            'port' => env('MAIL_PORT', 1025),
-            'encryption' => env('MAIL_ENCRYPTION', null),
-            'username' => env('MAIL_USERNAME'),
-            'password' => env('MAIL_PASSWORD'),
-        ],
-    ],
-
-    'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', 'Laravel'),
-    ],
-
-    'markdown' => [
-        'theme' => 'default',
-
-        'paths' => [
-             resource_path('views/emails'), // カスタムビュー用ディレクトリ
-        resource_path('views/vendor/mail'), // デフォルトのオーバーライド用
-          ],
-
-],
-
-];
-
-以下のコマンドを実行  
-$ php artisan config:clear   
-$ php artisan cache:clear
-
-### ⑫-3. 　 Mailpit の動作確認
-
-<http://localhost:8025> にアクセスすることで、Mailpit を確認できます。
+<http://localhost:8025> にアクセスすることで、Mailhog を確認できます。
 
 ## ⑬Stripe の設定
 
@@ -188,7 +145,7 @@ STRIPE_SECRET_KEY=your_test_stripe_secret_key
 
 以下のコマンドを実行  
 $ php artisan config:clear  
-$ php artisan cache:clear  
+$ php artisan cache:clear
 
 ### ⑬-3. 　 Stripe パッケージをインストール
 
@@ -218,51 +175,64 @@ Laravel 11 では、Fortify はデフォルトでサービスプロバイダが�
 
 # アプリケーション使用時の注意点
 
-## ホーム画面のURLについて
-ホーム画面のURLは、<http://localhost/items>です。
+## ホーム画面の URL について
+
+ホーム画面の URL は、<http://localhost/items>です。
 
 ## ログインの試行について
 
 ### ログイン時に必要なメールアドレスとパスワード
-シーディングによって、サンプルユーザーが10人作成されます。
+
+シーディングによって、サンプルユーザーが ３人作成されます。
 
 メールアドレス：<http://localhost:8080> にアクセスし、phpMyAdmin で確認できます。
 
 パスワード：すべてのサンプルユーザーのパスワードは「123456789」で統一しています。
 
 ### メール認証について
+
 ログイン時に認証メールが届きます。
 
-<http://localhost:8025> にアクセスし、Mailpit でメールを確認できます。
+<http://localhost:8025> にアクセスし、Mailhog でメールを確認できます。
 
 届いた認証メール本文の認証リンクをクリックすると、ログインが完了します。
 
 ## 購入処理の試行について
 
-支払い方法を選択し、「購入する」ボタンを押すと、Stripeの決済画面に遷移します。
+支払い方法を選択し、「購入する」ボタンを押すと、Stripe の決済画面に遷移します。
 
 カード払いの場合：<https://docs.stripe.com/testing?testing-method=card-numbers#cards>に記載の、テストカード情報を入力してください。
 
-コンビニ払いの場合：環境構築＞⑬Stripe の設定＞⑬- 1. Stripe アカウントの作成＞
+コンビニ払いの場合：環境構築＞ ⑬Stripe の設定＞ ⑬- 1. Stripe アカウントの作成＞
 １．Stripe のダッシュボードで「コンビニ払い」を有効化　を行っていないと、コンビニ払いができません。
 
-また、コンビニ払いは、支払いの完了が確認できないため、Stripeの決済画面で手続きが終わっても、購入完了とならず、画面遷移しません。
+また、コンビニ払いは、支払いの完了が確認できないため、Stripe の決済画面で手続きが終わっても、購入完了とならず、画面遷移しません。
+
+## 取引中の商品に関する挙動を確認する際は、商品購入時にコンビニ払いではなく、カード払いを選択してください。
+
+購入者が商品を購入する際、コンビニ払いを選択してしまうと、支払いの完了が確認できないため、Stripe の決済画面で手続きが終わっても、購入完了とならず、「取引中の商品一覧」画面に商品が表示されません。
+
+また、「取引中の商品一覧」画面に商品が表示されないことにより、「取引チャット」画面へ遷移できません。
+
+そのため、商品を購入する操作を行う際は、コンビニ払いではなく、カード払いを選択してください。
 
 
 # 使用技術(実行環境)
 
 Laravel Framework 11.3.2  
 PHP 8.2 以上  
-Mailpit  
+Mailhog  
 Fortify  
-Stripe 16.4  
+Stripe 16.4
 
 # ER 図
 
-![er](https://github.com/user-attachments/assets/04f934aa-53fb-4c79-aecf-1e7b9ac7fe95)
+
 
 # URL
 
-開発環境：[git@github.com:yuki-constructor/coachtech-mock-case1-2.git](https://github.com/yuki-constructor/coachtech-mock-case1-2.git)
-# coachtech-pro-entrance-test
-# coachtech-pro-entrance-test
+開発環境：
+gitHub：<https://github.com/yuki-constructor/coachtech-pro-entrance-test.git>  
+ホーム画面：<<http://localhost/items>  
+phpMyAdmin ：<http://localhost:8080>  
+Mailhog ：<http://localhost:8025>  
