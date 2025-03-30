@@ -15,13 +15,17 @@ class TransactionMessage extends Model
         'is_sent',
     ];
 
-    // TransactionMessageは1対多の関係でTransactionと関連(取引きに紐づいた複数のメッセージ)
+    /**
+     *  TransactionMessageは1対多の関係でTransactionと関連(取引きに紐づいた複数のメッセージ)
+     */
     public function transaction()
     {
         return $this->belongsTo(Transaction::class);
     }
 
-    // TransactionMessageは1対多の関係でUserと関連(userは複数のメッセージを投稿可能)
+    /**
+     *  TransactionMessageは1対多の関係でUserと関連(userは複数のメッセージを投稿可能)
+     */
     public function user()
     {
         return $this->belongsTo(User::class);

@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTransactionMessageRequest;
 use App\Models\Transaction;
 use App\Models\TransactionMessage;
+use App\Models\TransactionReview;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class TransactionController extends Controller
 {
-    // 取引チャット画面表示
+    /**
+     *  取引チャット画面表示
+     */
     public function show($transactionId)
     {
         $user = Auth::user();
@@ -24,15 +27,15 @@ class TransactionController extends Controller
         // 他の取引を取得 (購入者 or 出品者として関与)
         $otherTransactions = Transaction::where('id', '!=', $transactionId)
             ->whereHas('purchase', function ($query) use ($user) {
-                $query->where(function ($q) use ($user) {
-                    // 購入者または出品者として関わる取引を取得
-                    $q->where('user_id', $user->id) // 購入者として
-                        ->orWhereHas('item', function ($q2) use ($user) {
-                            $q2->where('user_id', $user->id); // 出品者として
-                        });
-                });
+                $query->where('user_id', $user->id)
+                    ->orWhereHas('item', function ($q) use ($user) {
+                        $q->where('user_id', $user->id);
+                    });
             })
-            ->whereNull('completed_at') // 取引中のものだけ
+            ->where(function ($query) {
+                $query->whereNull('buyer_completed_at')
+                    ->orWhereNull('seller_completed_at');
+            })
             ->get();
 
         // チャットメッセージ取得 (昇順)
@@ -64,6 +67,20 @@ class TransactionController extends Controller
                 ];
             });
 
+        // 出品者の取引を取得
+        $transactions = Transaction::whereHas('purchase.item', function ($query) use ($user) {
+            $query->where('user_id', $user->id); // 出品者であること
+        })->get();
+
+        // 購入者が評価済みで出品者が未評価の取引があるかチェック
+        $unreviewedTransaction = $transactions->first(function ($transaction) {
+            return $transaction->buyer_completed_at && !$transaction->seller_completed_at;
+        });
+
+        if ($unreviewedTransaction) {
+            session()->flash('showReviewModal', true);
+        }
+
         return view('transaction.show', [
             'transaction' => $transaction,
             'partner' => $partner,
@@ -72,7 +89,9 @@ class TransactionController extends Controller
         ]);
     }
 
-    // メッセージ送信
+    /**
+     *  メッセージ送信処理
+     */
     public function store(StoreTransactionMessageRequest $request, $transactionId)
     {
         $transaction = Transaction::findOrFail($transactionId);
@@ -94,7 +113,9 @@ class TransactionController extends Controller
         return redirect()->route('transaction.show', $transaction->id);
     }
 
-    // メッセージ編集
+    /**
+     *  メッセージ編集処理
+     */
     public function update(StoreTransactionMessageRequest $request, $transactionId, $messageId)
     {
         $transaction = Transaction::findOrFail($transactionId);
@@ -112,7 +133,9 @@ class TransactionController extends Controller
         return redirect()->route('transaction.show', $transactionId);
     }
 
-    // メッセージ削除
+    /**
+     *  メッセージ削除処理
+     */
     public function destroy($transactionId, $messageId)
     {
         $transaction = Transaction::findOrFail($transactionId);
@@ -127,18 +150,50 @@ class TransactionController extends Controller
         return redirect()->route('transaction.show', $transactionId);
     }
 
-    // 取引を完了にする処理
+    /**
+     *  購入者ユーザーが取引を完了にする処理（出品者ユーザーが購入者ユーザーを評価するまで取引完了ではない）
+     */
     public function complete($transactionId)
     {
         $transaction = Transaction::findOrFail($transactionId);
 
         // ログイン中のユーザーが購入者か確認
         if (Auth::id() === $transaction->purchase->user_id) {
-            $transaction->status = 1;
-            $transaction->completed_at = now();
+            // $transaction->status = 1;
+            $transaction->buyer_completed_at = now();
             $transaction->save();
         }
 
-        return redirect()->route('transaction.show', $transactionId);
+        return redirect()->route('transaction.show', $transactionId)->with('showReviewModal', true);
+    }
+
+    /**
+     *  取引相手の評価投稿処理
+     */
+    public function submitReview(Request $request, $transactionId)
+    {
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+        ]);
+
+        $transaction = Transaction::findOrFail($transactionId);
+        $reviewerId = Auth::id();
+        $revieweeId = ($reviewerId === $transaction->purchase->user_id) ? $transaction->purchase->item->user_id : $transaction->purchase->user_id;
+
+        TransactionReview::create([
+            'transaction_id' => $transactionId,
+            'reviewer_id' => $reviewerId,
+            'reviewee_id' => $revieweeId,
+            'rating' => $request->rating,
+        ]);
+
+        if ($reviewerId === $transaction->purchase->user_id) {
+            return redirect()->route('items.index')->with('reviewSubmitted', true);
+        } else {
+            $transaction->seller_completed_at = now();
+            $transaction->status = 1;
+            $transaction->save();
+            return redirect()->route('items.index')->with('transactionCompleted', true);
+        }
     }
 }

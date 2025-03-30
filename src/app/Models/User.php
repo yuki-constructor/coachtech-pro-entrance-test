@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -74,5 +73,17 @@ class User extends Authenticatable
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    // Userは1対多の関係でTransactionReviewと関連(Userが「レビュアー」 の立場で書いたレビュー一覧を取得)
+    public function givenReviews()
+    {
+        return $this->hasMany(TransactionReview::class, 'reviewer_id');
+    }
+
+    // Userは1対多の関係でTransactionReviewと関連(Userが「レビュー対象」 の立場で受けたレビュー一覧を取得)
+    public function receivedReviews()
+    {
+        return $this->hasMany(TransactionReview::class, 'reviewee_id');
     }
 }

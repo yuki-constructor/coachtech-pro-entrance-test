@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('purchase_id');
             $table->string('status')->default(0); // 0: 取引中, 1: 取引完了   取引状態フラグ
-            $table->dateTime('completed_at')->nullable(); // 取引完了日時
+            $table->dateTime('buyer_completed_at')->nullable(); // 購入者が取引完了ボタンを押下した日
+            $table->dateTime('seller_completed_at')->nullable(); // 出品者が購入者を評価した日
             $table->timestamps();
         });
     }
