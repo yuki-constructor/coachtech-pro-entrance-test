@@ -58,39 +58,54 @@
                     <img class="user-profile-image"
                         src="{{ asset('storage/photos/profile_images/' . $user->profile_image) }}" alt="">
                 </div>
-                <p>{{ $user->name }}</p>
+                <div>
+                    <p>{{ $user->name }}</p>
+                    {{-- 取引評価の平均を星で表示 --}}
+                    @if ($averageRating !== null)
+                        <div class="user-rating">
+                            @for ($i = 1; $i <= 5; $i++)
+                                @if ($i <= $averageRating)
+                                    <span class="star filled">★</span>
+                                @else
+                                    <span class="star">★</span>
+                                @endif
+                            @endfor
+                        </div>
+                    @endif
+                </div>
                 <a href="{{ route('profile.edit') }}" class="user-profile-edit__btn">プロフィールを編集</a>
             </div>
         </div>
         <div class="menu">
-            <a href="{{ route('profile.show.sell') }}" class="menu__left-link">出品した商品</a>
-            <a href="{{ route('profile.show.buy') }}" class="menu__center-link">購入した商品</a>
-            <a href="#" class="menu__right-link">取引中の商品</a>
+            <a href="{{ route('profile.show.sell') }}" class="menu__left-link">出品した商品
+            </a>
+            <a href="{{ route('profile.show.buy') }}" class="menu__center-link">購入した商品
+            </a>
+            <a href="#" class="menu__right-link">取引中の商品
+                {{-- 未読通知マーク --}}
+                @if ($totalUnreadCount > 0)
+                    <span class="total-notification-badge">{{ $totalUnreadCount }}</span>
+                @endif
+            </a>
         </div>
         <div class="item-list">
             @foreach ($transactions as $transaction)
                 <a href="{{ route('transaction.show', ['transactionId' => $transaction->id]) }}">
                     <div class="item">
                         {{-- 商品画像 --}}
-                        <img class="item-image"
-                            src="{{ asset('storage/photos/item_images/' . $transaction->purchase->item->item_image) }}"
-                            alt="">
-
-                        <div class="item-name">{{ $transaction->purchase->item->item_name }}</div>
-
-                        {{-- 通知マーク (未読が1件以上の場合のみ表示) --}}
-                        {{-- @if (isset($unreadCounts[$transaction->id]) && $unreadCounts[$transaction->id] > 0)
-                        <span class="notification-badge">
-                            {{ $unreadCounts[$transaction->id] }}
-                        </span>
-                    @endif --}}
-
-                        @if ($transaction->unread_count > 0)
-                            <span class="notification-badge">
-                                {{ $transaction->unread_count }}
-                            </span>
-                        @endif
-
+                        <div class="item-image">
+                            <img class="item-image__img"
+                                src="{{ asset('storage/photos/item_images/' . $transaction->purchase->item->item_image) }}"
+                                alt="">
+                            {{-- 未読通知マーク (未読が1件以上の場合のみ表示) --}}
+                            @if ($transaction->unread_count > 0)
+                                <span class="notification-badge">
+                                    {{ $transaction->unread_count }}
+                                </span>
+                            @endif
+                        </div>
+                        <div class="item-name">{{ $transaction->purchase->item->item_name }}
+                        </div>
                     </div>
                 </a>
             @endforeach

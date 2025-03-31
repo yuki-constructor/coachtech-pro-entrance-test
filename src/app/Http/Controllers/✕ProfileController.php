@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 use App\Models\Item;
+use App\Models\Purchase;
 use App\Models\Transaction;
 use App\Models\TransactionMessage;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use App\Http\Requests\ProfileRequest;
 use App\Http\Requests\AddressRequest;
 
@@ -48,9 +53,7 @@ class ProfileController extends Controller
 
     }
 
-    /**
-     * プロフィール表示画面（出品した商品）
-     */
+    // プロフィール表示画面（出品した商品）
     public function showSell()
     {
         $user = Auth::user();
@@ -92,9 +95,8 @@ class ProfileController extends Controller
         ]);
     }
 
-    /**
-     * プロフィール表示画面（購入した商品）
-     */
+
+    // プロフィール表示画面（購入した商品）
     public function showBuy()
     {
         $user = Auth::user();
@@ -136,9 +138,7 @@ class ProfileController extends Controller
         ]);
     }
 
-    /**
-     * プロフィール表示画面（取引中の商品）
-     */
+    // プロフィール表示画面（取引中の商品）
     public function showTransaction()
     {
         $user = Auth::user();
@@ -163,24 +163,23 @@ class ProfileController extends Controller
                 $query->where('is_read', 0) // 未読メッセージのみ
                     ->where('user_id', '!=', $user->id); // 取引相手のメッセージのみカウント
             }])
+            ->orderByDesc('created_at') // 取引メッセージ順にソート(結合後にソート)
             ->get(); // コレクションとして取得
+
+        // 未読メッセージのカウント
+        $totalUnreadCount = 0;
+        $unreadCounts = [];
 
         foreach ($transactions as $transaction) {
             // 取引相手からの未読メッセージをカウント
-            $latestMessage = TransactionMessage::where('transaction_id', $transaction->id)
+            $unreadCount = TransactionMessage::where('transaction_id', $transaction->id)
                 ->where('user_id', '!=', $user->id) // 取引相手のメッセージのみ
-                ->latest('created_at') // 最新のメッセージ
-                ->first();
+                ->where('is_read', 0) // 未読のみ
+                ->count();
 
-            // 取引に最新メッセージの created_at をセット（なければ null）
-            $transaction->latest_message_created_at = $latestMessage ? $latestMessage->created_at : null;
+            $unreadCounts[$transaction->id] = $unreadCount;
+            $totalUnreadCount += $unreadCount;
         }
-
-        // 最新メッセージの created_at で並び替え（降順）
-        $transactions = $transactions->sortByDesc('latest_message_created_at');
-
-        // 未読メッセージのカウント
-        $totalUnreadCount = $transactions->sum('unread_count');
 
         // 受けた評価の平均を計算（四捨五入）
         $averageRating = $user->receivedReviews()->avg('rating');

@@ -114,6 +114,20 @@ body {
     font-weight: bold;
 }
 
+.user-rating {
+    /* font-size: 20px; */
+    font-size: clamp(25px, 2.3vw, 35px);
+    margin-left: 10px;
+}
+
+.user-rating .star {
+    color: #ccc;
+}
+
+.user-rating .star.filled {
+    color: gold;
+}
+
 /* メニューバー */
 .menu {
     padding: 10px 20px;
@@ -143,6 +157,18 @@ body {
 .menu__center-link:hover,
 .menu__right-link:hover {
     text-decoration: underline;
+}
+
+.total-notification-badge {
+    background-color: red;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 40%;
+    padding: 5px 5px;
+    display: inline-block;
+    min-width: 20px;
+    text-align: center;
 }
 
 /* 商品リスト */

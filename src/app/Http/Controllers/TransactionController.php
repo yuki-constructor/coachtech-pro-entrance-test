@@ -26,6 +26,12 @@ class TransactionController extends Controller
         $isSeller = $transaction->purchase->item->user_id === $user->id; // ログインユーザーが出品者か判定
         $partner = $isSeller ? $transaction->purchase->user : $transaction->purchase->item->user; // 取引相手ユーザーを特定
 
+        // ログインユーザーが相手から受け取った未読メッセージを取得し、既読に更新
+        TransactionMessage::where('transaction_id', $transactionId)
+            ->where('user_id', $partner->id)  // 取引相手が送信したメッセージ
+            ->where('is_read', 0)  // 未読メッセージ
+            ->update(['is_read' => 1]);  // 既読に更新
+
         // 他の取引を取得 (購入者 or 出品者として関与)
         $otherTransactions = Transaction::where('id', '!=', $transactionId)
             ->whereHas('purchase', function ($query) use ($user) {
@@ -79,7 +85,7 @@ class TransactionController extends Controller
             return $transaction->buyer_completed_at && !$transaction->seller_completed_at;
         });
 
-        if ($unreviewedTransaction) {
+        if ($unreviewedTransaction && session('showReviewModal') === true) {
             session()->flash('showReviewModal', true);
         }
 
@@ -161,7 +167,6 @@ class TransactionController extends Controller
 
         // ログイン中のユーザーが購入者か確認
         if (Auth::id() === $transaction->purchase->user_id) {
-            // $transaction->status = 1;
             $transaction->buyer_completed_at = now();
             $transaction->save();
         }
