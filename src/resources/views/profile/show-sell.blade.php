@@ -58,13 +58,39 @@
                     <img class="user-profile-image"
                         src="{{ asset('storage/photos/profile_images/' . $user->profile_image) }}" alt="">
                 </div>
-                <p>{{ $user->name }}</p>
+                <div>
+                    <p>{{ $user->name }}</p>
+                    {{-- 取引評価の平均を星で表示 --}}
+                    @if ($averageRating !== null)
+                        <div class="user-rating">
+                            @for ($i = 1; $i <= 5; $i++)
+                                @if ($i <= $averageRating)
+                                    <span class="star filled">★</span>
+                                @else
+                                    <span class="star">★</span>
+                                @endif
+                            @endfor
+
+                        </div>
+                    @endif
+                </div>
                 <a href="{{ route('profile.edit') }}" class="user-profile-edit__btn">プロフィールを編集</a>
             </div>
         </div>
         <div class="menu">
-            <a href="#" class="menu__left-link">出品した商品</a>
-            <a href="{{ route('profile.show.buy') }}" class="menu__right-link">購入した商品</a>
+            <a href="#" class="menu__left-link">
+                出品した商品
+            </a>
+            <a href="{{ route('profile.show.buy') }}" class="menu__center-link">
+                購入した商品
+            </a>
+            <a href="{{ route('profile.show.transaction') }}" class="menu__right-link">
+                取引中の商品
+                {{-- 未読通知マーク --}}
+                @if ($totalUnreadCount > 0)
+                    <span class="total-notification-badge">{{ $totalUnreadCount }}</span>
+                @endif
+            </a>
         </div>
         <div class="item-list">
             @foreach ($items as $item)
@@ -74,23 +100,6 @@
                     <div class="item-name">{{ $item->item_name }}</div>
                 </div>
             @endforeach
-
-            {{-- <div class="item">
-          <div class="item-image">商品画像</div>
-          <div class="item-name">商品名</div>
-        </div>
-        <div class="item">
-          <div class="item-image">商品画像</div>
-          <div class="item-name">商品名</div>
-        </div>
-        <div class="item">
-          <div class="item-image">商品画像</div>
-          <div class="item-name">商品名</div>
-        </div>
-        <div class="item">
-          <div class="item-image">商品画像</div>
-          <div class="item-name">商品名</div>
-        </div> --}}
         </div>
     </main>
 </body>
